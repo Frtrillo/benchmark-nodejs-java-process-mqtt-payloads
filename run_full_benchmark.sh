@@ -60,15 +60,21 @@ echo ""
 # Verificar dependencias
 echo -e "${YELLOW}🔍 Verificando dependencias...${NC}"
 
-# Detectar runtime de Node.js
-NODE_RUNTIME=""
+# Detectar runtimes disponibles
+BUN_AVAILABLE=false
+NODE_AVAILABLE=false
+
 if command -v bun &> /dev/null; then
-    NODE_RUNTIME="bun"
+    BUN_AVAILABLE=true
     echo -e "${GREEN}✅ Bun detectado${NC}"
-elif command -v node &> /dev/null; then
-    NODE_RUNTIME="node"
+fi
+
+if command -v node &> /dev/null; then
+    NODE_AVAILABLE=true
     echo -e "${GREEN}✅ Node.js detectado${NC}"
-else
+fi
+
+if [ "$BUN_AVAILABLE" = false ] && [ "$NODE_AVAILABLE" = false ]; then
     echo -e "${RED}❌ Ni Node.js ni Bun están instalados${NC}"
     exit 1
 fi
@@ -84,7 +90,7 @@ if ! command -v mvn &> /dev/null; then
 fi
 
 echo -e "${GREEN}✅ Todas las dependencias están disponibles${NC}"
-echo -e "${BLUE}📋 Runtime de Node.js: $NODE_RUNTIME${NC}"
+echo -e "${BLUE}📋 Runtimes disponibles: $([ "$BUN_AVAILABLE" = true ] && echo -n "Bun ") $([ "$NODE_AVAILABLE" = true ] && echo -n "Node.js ")${NC}"
 echo ""
 
 # Compilar Java si es necesario
@@ -102,15 +108,26 @@ echo -e "${PURPLE}           🏁 BENCHMARK 1: MQTT PAYLOAD PROCESSING${NC}"
 echo -e "${PURPLE}═══════════════════════════════════════════${NC}"
 echo ""
 
-# MQTT Benchmark - Node.js single-thread
-echo -e "${YELLOW}🏃 Ejecutando $NODE_RUNTIME MQTT (single-thread)...${NC}"
-MQTT_NODE_SINGLE=$($NODE_RUNTIME bench_node.js)
-show_result "MQTT" "$NODE_RUNTIME" "1" "$MQTT_NODE_SINGLE"
+# MQTT Benchmarks - Run available runtimes
+if [ "$BUN_AVAILABLE" = true ]; then
+    echo -e "${YELLOW}🏃 Ejecutando Bun MQTT (single-thread)...${NC}"
+    MQTT_BUN_SINGLE=$(bun bench_node.js)
+    show_result "MQTT" "Bun" "1" "$MQTT_BUN_SINGLE"
 
-# MQTT Benchmark - Node.js multi-thread
-echo -e "${YELLOW}🏃 Ejecutando $NODE_RUNTIME MQTT (multi-thread, $NODE_WORKERS workers)...${NC}"
-MQTT_NODE_MULTI=$(WORKERS=$NODE_WORKERS $NODE_RUNTIME bench_node.js)
-show_result "MQTT" "$NODE_RUNTIME" "$NODE_WORKERS" "$MQTT_NODE_MULTI"
+    echo -e "${YELLOW}🏃 Ejecutando Bun MQTT (multi-thread, $NODE_WORKERS workers)...${NC}"
+    MQTT_BUN_MULTI=$(WORKERS=$NODE_WORKERS bun bench_node.js)
+    show_result "MQTT" "Bun" "$NODE_WORKERS" "$MQTT_BUN_MULTI"
+fi
+
+if [ "$NODE_AVAILABLE" = true ]; then
+    echo -e "${YELLOW}🏃 Ejecutando Node.js MQTT (single-thread)...${NC}"
+    MQTT_NODE_SINGLE=$(node bench_node.js)
+    show_result "MQTT" "Node.js" "1" "$MQTT_NODE_SINGLE"
+
+    echo -e "${YELLOW}🏃 Ejecutando Node.js MQTT (multi-thread, $NODE_WORKERS workers)...${NC}"
+    MQTT_NODE_MULTI=$(WORKERS=$NODE_WORKERS node bench_node.js)
+    show_result "MQTT" "Node.js" "$NODE_WORKERS" "$MQTT_NODE_MULTI"
+fi
 
 # MQTT Benchmark - Java
 echo -e "${YELLOW}🏃 Ejecutando Java MQTT ($JAVA_WORKERS workers)...${NC}"
@@ -124,15 +141,26 @@ echo -e "${PURPLE}           🧮 BENCHMARK 2: ALGORITHMIC COMPUTATION${NC}"
 echo -e "${PURPLE}═══════════════════════════════════════════${NC}"
 echo ""
 
-# Algorithmic Benchmark - Node.js single-thread
-echo -e "${YELLOW}🏃 Ejecutando $NODE_RUNTIME Algoritmo (single-thread)...${NC}"
-ALGO_NODE_SINGLE=$($NODE_RUNTIME bench_algo_node.js)
-show_result "Algoritmo" "$NODE_RUNTIME" "1" "$ALGO_NODE_SINGLE"
+# Algorithmic Benchmarks - Run available runtimes
+if [ "$BUN_AVAILABLE" = true ]; then
+    echo -e "${YELLOW}🏃 Ejecutando Bun Algoritmo (single-thread)...${NC}"
+    ALGO_BUN_SINGLE=$(bun bench_algo_node.js)
+    show_result "Algoritmo" "Bun" "1" "$ALGO_BUN_SINGLE"
 
-# Algorithmic Benchmark - Node.js multi-thread
-echo -e "${YELLOW}🏃 Ejecutando $NODE_RUNTIME Algoritmo (multi-thread, $NODE_WORKERS workers)...${NC}"
-ALGO_NODE_MULTI=$(WORKERS=$NODE_WORKERS $NODE_RUNTIME bench_algo_node.js)
-show_result "Algoritmo" "$NODE_RUNTIME" "$NODE_WORKERS" "$ALGO_NODE_MULTI"
+    echo -e "${YELLOW}🏃 Ejecutando Bun Algoritmo (multi-thread, $NODE_WORKERS workers)...${NC}"
+    ALGO_BUN_MULTI=$(WORKERS=$NODE_WORKERS bun bench_algo_node.js)
+    show_result "Algoritmo" "Bun" "$NODE_WORKERS" "$ALGO_BUN_MULTI"
+fi
+
+if [ "$NODE_AVAILABLE" = true ]; then
+    echo -e "${YELLOW}🏃 Ejecutando Node.js Algoritmo (single-thread)...${NC}"
+    ALGO_NODE_SINGLE=$(node bench_algo_node.js)
+    show_result "Algoritmo" "Node.js" "1" "$ALGO_NODE_SINGLE"
+
+    echo -e "${YELLOW}🏃 Ejecutando Node.js Algoritmo (multi-thread, $NODE_WORKERS workers)...${NC}"
+    ALGO_NODE_MULTI=$(WORKERS=$NODE_WORKERS node bench_algo_node.js)
+    show_result "Algoritmo" "Node.js" "$NODE_WORKERS" "$ALGO_NODE_MULTI"
+fi
 
 # Algorithmic Benchmark - Java
 echo -e "${YELLOW}🏃 Ejecutando Java Algoritmo ($JAVA_WORKERS workers)...${NC}"
@@ -148,13 +176,24 @@ ALGO_JAVA=$(cd bench_java && java -Xms4g -Xmx4g -XX:+UseG1GC \
 show_result "Algoritmo" "Java" "$JAVA_WORKERS" "$ALGO_JAVA"
 
 # Extraer métricas para comparación
-MQTT_NODE_SINGLE_RPS=$(extract_metric "$MQTT_NODE_SINGLE" "rps")
-MQTT_NODE_MULTI_RPS=$(extract_metric "$MQTT_NODE_MULTI" "rps")
 MQTT_JAVA_RPS=$(extract_metric "$MQTT_JAVA" "rps")
-
-ALGO_NODE_SINGLE_OPS=$(extract_metric "$ALGO_NODE_SINGLE" "ops_per_sec")
-ALGO_NODE_MULTI_OPS=$(extract_metric "$ALGO_NODE_MULTI" "ops_per_sec")
 ALGO_JAVA_OPS=$(extract_metric "$ALGO_JAVA" "ops_per_sec")
+
+# Extraer métricas de Bun si está disponible
+if [ "$BUN_AVAILABLE" = true ]; then
+    MQTT_BUN_SINGLE_RPS=$(extract_metric "$MQTT_BUN_SINGLE" "rps")
+    MQTT_BUN_MULTI_RPS=$(extract_metric "$MQTT_BUN_MULTI" "rps")
+    ALGO_BUN_SINGLE_OPS=$(extract_metric "$ALGO_BUN_SINGLE" "ops_per_sec")
+    ALGO_BUN_MULTI_OPS=$(extract_metric "$ALGO_BUN_MULTI" "ops_per_sec")
+fi
+
+# Extraer métricas de Node.js si está disponible
+if [ "$NODE_AVAILABLE" = true ]; then
+    MQTT_NODE_SINGLE_RPS=$(extract_metric "$MQTT_NODE_SINGLE" "rps")
+    MQTT_NODE_MULTI_RPS=$(extract_metric "$MQTT_NODE_MULTI" "rps")
+    ALGO_NODE_SINGLE_OPS=$(extract_metric "$ALGO_NODE_SINGLE" "ops_per_sec")
+    ALGO_NODE_MULTI_OPS=$(extract_metric "$ALGO_NODE_MULTI" "ops_per_sec")
+fi
 
 echo -e "${CYAN}📈 RESUMEN COMPARATIVO COMPLETO${NC}"
 echo "=================================================="
@@ -162,46 +201,121 @@ echo ""
 echo -e "${CYAN}🏆 BENCHMARK 1: MQTT Payload Processing${NC}"
 printf "%-20s %-10s %-15s\n" "Lenguaje" "Workers" "RPS"
 echo "--------------------------------------------------"
-printf "%-20s %-10s %-15s\n" "$NODE_RUNTIME" "1" "$MQTT_NODE_SINGLE_RPS"
-printf "%-20s %-10s %-15s\n" "$NODE_RUNTIME" "$NODE_WORKERS" "$MQTT_NODE_MULTI_RPS"
+if [ "$BUN_AVAILABLE" = true ]; then
+    printf "%-20s %-10s %-15s\n" "Bun" "1" "$MQTT_BUN_SINGLE_RPS"
+    printf "%-20s %-10s %-15s\n" "Bun" "$NODE_WORKERS" "$MQTT_BUN_MULTI_RPS"
+fi
+if [ "$NODE_AVAILABLE" = true ]; then
+    printf "%-20s %-10s %-15s\n" "Node.js" "1" "$MQTT_NODE_SINGLE_RPS"
+    printf "%-20s %-10s %-15s\n" "Node.js" "$NODE_WORKERS" "$MQTT_NODE_MULTI_RPS"
+fi
 printf "%-20s %-10s %-15s\n" "Java" "$JAVA_WORKERS" "$MQTT_JAVA_RPS"
 echo ""
 
 echo -e "${CYAN}🧮 BENCHMARK 2: Algorithmic Computation${NC}"
 printf "%-20s %-10s %-15s\n" "Lenguaje" "Workers" "Ops/Sec"
 echo "--------------------------------------------------"
-printf "%-20s %-10s %-15s\n" "$NODE_RUNTIME" "1" "$ALGO_NODE_SINGLE_OPS"
-printf "%-20s %-10s %-15s\n" "$NODE_RUNTIME" "$NODE_WORKERS" "$ALGO_NODE_MULTI_OPS"
+if [ "$BUN_AVAILABLE" = true ]; then
+    printf "%-20s %-10s %-15s\n" "Bun" "1" "$ALGO_BUN_SINGLE_OPS"
+    printf "%-20s %-10s %-15s\n" "Bun" "$NODE_WORKERS" "$ALGO_BUN_MULTI_OPS"
+fi
+if [ "$NODE_AVAILABLE" = true ]; then
+    printf "%-20s %-10s %-15s\n" "Node.js" "1" "$ALGO_NODE_SINGLE_OPS"
+    printf "%-20s %-10s %-15s\n" "Node.js" "$NODE_WORKERS" "$ALGO_NODE_MULTI_OPS"
+fi
 printf "%-20s %-10s %-15s\n" "Java" "$JAVA_WORKERS" "$ALGO_JAVA_OPS"
 echo ""
 
 # Determinar ganadores
 echo -e "${GREEN}🏆 GANADORES POR BENCHMARK:${NC}"
 
-# MQTT Winner
-if [ "$MQTT_NODE_MULTI_RPS" -gt "$MQTT_JAVA_RPS" ]; then
-    MQTT_IMPROVEMENT=$(( (MQTT_NODE_MULTI_RPS * 100) / MQTT_JAVA_RPS - 100 ))
-    echo -e "${GREEN}📨 MQTT Processing: $NODE_RUNTIME (+$MQTT_IMPROVEMENT% vs Java)${NC}"
-else
-    MQTT_IMPROVEMENT=$(( (MQTT_JAVA_RPS * 100) / MQTT_NODE_MULTI_RPS - 100 ))
-    echo -e "${BLUE}📨 MQTT Processing: Java (+$MQTT_IMPROVEMENT% vs $NODE_RUNTIME)${NC}"
-fi
+# Función para encontrar el mejor resultado MQTT
+find_mqtt_winner() {
+    local best_rps=0
+    local best_runtime=""
+    
+    if [ "$BUN_AVAILABLE" = true ] && [ "$MQTT_BUN_MULTI_RPS" -gt "$best_rps" ]; then
+        best_rps=$MQTT_BUN_MULTI_RPS
+        best_runtime="Bun"
+    fi
+    
+    if [ "$NODE_AVAILABLE" = true ] && [ "$MQTT_NODE_MULTI_RPS" -gt "$best_rps" ]; then
+        best_rps=$MQTT_NODE_MULTI_RPS
+        best_runtime="Node.js"
+    fi
+    
+    if [ "$MQTT_JAVA_RPS" -gt "$best_rps" ]; then
+        best_rps=$MQTT_JAVA_RPS
+        best_runtime="Java"
+    fi
+    
+    local improvement=$(( (best_rps * 100) / MQTT_JAVA_RPS - 100 ))
+    if [ "$best_runtime" = "Java" ]; then
+        local js_best=0
+        [ "$BUN_AVAILABLE" = true ] && [ "$MQTT_BUN_MULTI_RPS" -gt "$js_best" ] && js_best=$MQTT_BUN_MULTI_RPS
+        [ "$NODE_AVAILABLE" = true ] && [ "$MQTT_NODE_MULTI_RPS" -gt "$js_best" ] && js_best=$MQTT_NODE_MULTI_RPS
+        improvement=$(( (best_rps * 100) / js_best - 100 ))
+        echo -e "${BLUE}📨 MQTT Processing: Java (+$improvement%)${NC}"
+    else
+        echo -e "${GREEN}📨 MQTT Processing: $best_runtime (+$improvement% vs Java)${NC}"
+    fi
+}
 
-# Algo Winner
-if [ "$ALGO_NODE_MULTI_OPS" -gt "$ALGO_JAVA_OPS" ]; then
-    ALGO_IMPROVEMENT=$(( (ALGO_NODE_MULTI_OPS * 100) / ALGO_JAVA_OPS - 100 ))
-    echo -e "${GREEN}🧮 Algorithmic: $NODE_RUNTIME (+$ALGO_IMPROVEMENT% vs Java)${NC}"
-else
-    ALGO_IMPROVEMENT=$(( (ALGO_JAVA_OPS * 100) / ALGO_NODE_MULTI_OPS - 100 ))
-    echo -e "${BLUE}🧮 Algorithmic: Java (+$ALGO_IMPROVEMENT% vs $NODE_RUNTIME)${NC}"
-fi
+# Función para encontrar el mejor resultado Algorítmico
+find_algo_winner() {
+    local best_ops=0
+    local best_runtime=""
+    
+    if [ "$BUN_AVAILABLE" = true ] && [ "$ALGO_BUN_MULTI_OPS" -gt "$best_ops" ]; then
+        best_ops=$ALGO_BUN_MULTI_OPS
+        best_runtime="Bun"
+    fi
+    
+    if [ "$NODE_AVAILABLE" = true ] && [ "$ALGO_NODE_MULTI_OPS" -gt "$best_ops" ]; then
+        best_ops=$ALGO_NODE_MULTI_OPS
+        best_runtime="Node.js"
+    fi
+    
+    if [ "$ALGO_JAVA_OPS" -gt "$best_ops" ]; then
+        best_ops=$ALGO_JAVA_OPS
+        best_runtime="Java"
+    fi
+    
+    local improvement=$(( (best_ops * 100) / ALGO_JAVA_OPS - 100 ))
+    if [ "$best_runtime" = "Java" ]; then
+        local js_best=0
+        [ "$BUN_AVAILABLE" = true ] && [ "$ALGO_BUN_MULTI_OPS" -gt "$js_best" ] && js_best=$ALGO_BUN_MULTI_OPS
+        [ "$NODE_AVAILABLE" = true ] && [ "$ALGO_NODE_MULTI_OPS" -gt "$js_best" ] && js_best=$ALGO_NODE_MULTI_OPS
+        improvement=$(( (best_ops * 100) / js_best - 100 ))
+        echo -e "${BLUE}🧮 Algorithmic: Java (+$improvement%)${NC}"
+    else
+        echo -e "${GREEN}🧮 Algorithmic: $best_runtime (+$improvement% vs Java)${NC}"
+    fi
+}
+
+find_mqtt_winner
+find_algo_winner
 
 echo ""
 echo -e "${CYAN}💡 ANÁLISIS:${NC}"
-echo "• MQTT Processing favorece a JavaScript/Bun (JSON parsing, I/O)"
-echo "• Algorithmic computation debería favorecer a Java (JIT, math)"
-echo "• Los resultados muestran las fortalezas reales de cada runtime"
+if [ "$BUN_AVAILABLE" = true ] && [ "$NODE_AVAILABLE" = true ]; then
+    echo "• Comparación completa: Bun vs Node.js vs Java"
+    echo "• Bun generalmente supera a Node.js estándar"
+    echo "• JavaScript moderno (V8/JavaScriptCore) es altamente competitivo"
+elif [ "$BUN_AVAILABLE" = true ]; then
+    echo "• Bun (JavaScriptCore) muestra rendimiento superior"
+    echo "• Optimizaciones agresivas de JIT en tiempo real"
+elif [ "$NODE_AVAILABLE" = true ]; then
+    echo "• Node.js (V8) demuestra capacidades competitivas"
+    echo "• Motor V8 altamente optimizado para estos workloads"
+fi
+echo "• Java sigue siendo válido para aplicaciones enterprise específicas"
+echo "• El rendimiento depende fuertemente del tipo de workload"
 
 echo ""
 echo -e "${GREEN}✅ Benchmark completo exitoso${NC}"
-echo "💡 Cada lenguaje tiene sus fortalezas según el tipo de workload"
+if [ "$BUN_AVAILABLE" = true ] && [ "$NODE_AVAILABLE" = true ]; then
+    echo "💡 Ejecutados todos los runtimes disponibles: Bun, Node.js y Java"
+else
+    echo "💡 Comparación exitosa entre los runtimes disponibles"
+fi

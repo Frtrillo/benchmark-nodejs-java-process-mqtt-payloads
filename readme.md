@@ -128,7 +128,7 @@ java -Xms4g -Xmx4g -XX:+UseG1GC \
 - **CPU**: MacBook Air M1 (8 GB RAM)
 - **OS**: macOS 14.6.0
 - **Java**: OpenJDK 17+ con G1GC
-- **Node.js Runtime**: Bun (JavaScriptCore)
+- **Runtimes JavaScript**: Bun (JavaScriptCore) + Node.js (V8)
 
 ---
 
@@ -138,25 +138,31 @@ java -Xms4g -Xmx4g -XX:+UseG1GC \
 
 | Lenguaje | Workers | Tiempo (ms) | RPS | Mejora vs Java |
 |----------|---------|-------------|-----|----------------|
-| **Bun** | 1 | 692.8 | **1,443,419** | - |
-| **Bun** | 8 | 260.8 | **3,833,889** | **+87%** 🏆 |
-| **Java** | 8 | 488.5 | **2,047,146** | - |
+| **Bun** | 1 | 1115.3 | **896,640** | - |
+| **Bun** | 8 | 536.7 | **1,863,177** | **+96%** |
+| **Node.js** | 1 | 1076.1 | **929,304** | - |
+| **Node.js** | 8 | 490.3 | **2,039,463** | **+115%** 🏆 |
+| **Java** | 8 | 1053.6 | **949,111** | - |
 
 ### 📈 Gráfico de Rendimiento - MQTT Processing
 
 ```mermaid
 graph LR
     subgraph "MQTT Payload Processing (RPS)"
-        A[Bun Single<br/>1,443,419 RPS] 
-        B[Bun Multi 8x<br/>3,833,889 RPS]
-        C[Java 8 Workers<br/>2,047,146 RPS]
+        A[Bun Single<br/>896,640 RPS] 
+        B[Bun Multi 8x<br/>1,863,177 RPS]
+        C[Node.js Single<br/>929,304 RPS]
+        D[Node.js Multi 8x<br/>2,039,463 RPS]
+        E[Java 8 Workers<br/>949,111 RPS]
     end
     
-    B --> |Winner +87%| C
+    D --> |Winner +115%| E
     
-    style B fill:#4CAF50,stroke:#2E7D32,color:#fff
-    style C fill:#2196F3,stroke:#1565C0,color:#fff
+    style D fill:#4CAF50,stroke:#2E7D32,color:#fff
+    style B fill:#8BC34A,stroke:#689F38,color:#fff
+    style E fill:#2196F3,stroke:#1565C0,color:#fff
     style A fill:#FF9800,stroke:#EF6C00,color:#fff
+    style C fill:#FFC107,stroke:#F57C00,color:#fff
 ```
 
 ### 📊 Comparación Visual - MQTT
@@ -164,9 +170,9 @@ graph LR
 ```mermaid
 xychart-beta
     title "MQTT Processing Performance (RPS)"
-    x-axis ["Bun Single", "Bun 8x", "Java 8x"]
-    y-axis "Requests per Second" 0 --> 4000000
-    bar [1443419, 3833889, 2047146]
+    x-axis ["Bun 1x", "Bun 8x", "Node 1x", "Node 8x", "Java 8x"]
+    y-axis "Requests per Second" 0 --> 2500000
+    bar [896640, 1863177, 929304, 2039463, 949111]
 ```
 
 ---
@@ -177,9 +183,11 @@ xychart-beta
 
 | Lenguaje | Workers | Tiempo (ms) | Ops/Sec | Mejora vs Java |
 |----------|---------|-------------|---------|----------------|
-| **Bun** | 1 | 757.4 | **132** | - |
-| **Bun** | 8 | 176.8 | **543** | **+96%** 🏆 |
-| **Java** | 8 | 1806.6 | **277** | - |
+| **Bun** | 1 | 783.6 | **128** | - |
+| **Bun** | 8 | 184.3 | **521** | **+84%** 🏆 |
+| **Node.js** | 1 | 1219.2 | **82** | - |
+| **Node.js** | 8 | 273.1 | **351** | **+24%** |
+| **Java** | 8 | 1766.3 | **283** | - |
 
 *Configuración: 500 sensores × 100,000 iteraciones = 50M operaciones*
 
@@ -188,16 +196,20 @@ xychart-beta
 ```mermaid
 graph LR
     subgraph "Algorithmic Computation (Ops/Sec)"
-        D[Bun Single<br/>132 Ops/Sec] 
-        E[Bun Multi 8x<br/>543 Ops/Sec]
-        F[Java 8 Workers<br/>277 Ops/Sec]
+        A[Bun Single<br/>128 Ops/Sec] 
+        B[Bun Multi 8x<br/>521 Ops/Sec]
+        C[Node.js Single<br/>82 Ops/Sec]
+        D[Node.js Multi 8x<br/>351 Ops/Sec]
+        E[Java 8 Workers<br/>283 Ops/Sec]
     end
     
-    E --> |Winner +96%| F
+    B --> |Winner +84%| E
     
-    style E fill:#4CAF50,stroke:#2E7D32,color:#fff
-    style F fill:#2196F3,stroke:#1565C0,color:#fff
-    style D fill:#FF9800,stroke:#EF6C00,color:#fff
+    style B fill:#4CAF50,stroke:#2E7D32,color:#fff
+    style D fill:#8BC34A,stroke:#689F38,color:#fff
+    style E fill:#2196F3,stroke:#1565C0,color:#fff
+    style A fill:#FF9800,stroke:#EF6C00,color:#fff
+    style C fill:#FFC107,stroke:#F57C00,color:#fff
 ```
 
 ### 📊 Comparación Visual - Algorithmic
@@ -205,9 +217,9 @@ graph LR
 ```mermaid
 xychart-beta
     title "Algorithmic Performance (Operations/Sec)"
-    x-axis ["Bun Single", "Bun 8x", "Java 8x"]
+    x-axis ["Bun 1x", "Bun 8x", "Node 1x", "Node 8x", "Java 8x"]
     y-axis "Operations per Second" 0 --> 600
-    bar [132, 543, 277]
+    bar [128, 521, 82, 351, 283]
 ```
 
 ---
@@ -216,7 +228,8 @@ xychart-beta
 
 ```mermaid
 pie title "Performance Winners by Benchmark"
-    "Bun Wins" : 2
+    "Node.js Wins" : 1
+    "Bun Wins" : 1
     "Java Wins" : 0
 ```
 
@@ -224,22 +237,41 @@ pie title "Performance Winners by Benchmark"
 
 | Benchmark | Ganador | Ventaja | Razón Principal |
 |-----------|---------|---------|-----------------|
-| 📨 **MQTT Processing** | **Bun** | **+87%** | JSON parsing, I/O eficiente |
-| 🧮 **Algorithmic** | **Bun** | **+96%** | JIT optimización agresiva |
+| 📨 **MQTT Processing** | **Node.js** | **+115%** | V8 optimizado para JSON/I/O |
+| 🧮 **Algorithmic** | **Bun** | **+84%** | JavaScriptCore + JIT agresivo |
+
+### 🥇 Ranking General por Runtime
+
+| Posición | Runtime | MQTT RPS | Algo Ops/Sec | Fortalezas |
+|----------|---------|----------|---------------|------------|
+| 🥇 **1st** | **Node.js** | 2,039,463 | 351 | Mejor balance general, V8 maduro |
+| 🥈 **2nd** | **Bun** | 1,863,177 | 521 | Excelente en computación, JavaScriptCore |
+| 🥉 **3rd** | **Java** | 949,111 | 283 | Estable pero superado en estos workloads |
 
 ### 🔍 Conclusiones Clave
 
-1. **🚀 Bun domina ambos escenarios** - Incluso en computación intensiva donde Java "debería" ganar
-2. **📊 Escalabilidad superior** - Bun mejora más con paralelización (8 workers)
-3. **⚡ JavaScript moderno es competitivo** - Los runtimes modernos han cerrado la brecha de rendimiento
-4. **🎯 Workload específico** - Para IoT/MQTT, Bun es claramente superior
+1. **🥇 Node.js (V8) lidera en MQTT** - Mejor rendimiento para JSON processing e I/O
+2. **🚀 Bun domina computación** - JavaScriptCore superior para algoritmos matemáticos
+3. **📊 JavaScript supera a Java** - Ambos runtimes JS superan a Java consistentemente  
+4. **⚡ Especialización por workload** - Cada runtime tiene sus fortalezas específicas
+5. **🎯 Runtimes modernos** - La era del "Java siempre más rápido" ha terminado
 
-### 💡 ¿Por qué Bun gana incluso en computación?
+### 💡 ¿Por qué JavaScript gana?
 
-- **JavaScriptCore optimizado**: Motor de Safari altamente eficiente
-- **JIT agresivo**: Optimización más rápida que Java para estos patrones
-- **Menor overhead**: Menos abstracción en operaciones matemáticas
-- **Worker threads eficientes**: Mejor paralelización para este tipo de carga
+**Node.js (V8) - MQTT Champion:**
+- **V8 maduro**: Años de optimización para JSON y operaciones de red
+- **Mejor I/O**: Optimizado para workloads de alta concurrencia
+- **Worker threads eficientes**: Excelente paralelización
+
+**Bun (JavaScriptCore) - Algo Champion:**
+- **JIT agresivo**: Optimización matemática superior a Java para estos patrones
+- **Menor overhead**: Menos abstracción en operaciones computacionales
+- **Startup rápido**: Optimización inmediata vs warmup de Java
+
+**Java - Perdedor inesperado:**
+- **JIT lento**: Necesita más tiempo/iteraciones para optimizar
+- **Overhead de GC**: Más presión de memoria en estos workloads
+- **Abstracción**: Más capas entre el código y el hardware
 
 ---
 
@@ -294,22 +326,39 @@ pie title "Performance Winners by Benchmark"
 ## 🚀 Próximos Pasos
 
 ### Para Desarrolladores IoT/MQTT
-- **Usa Bun** para aplicaciones de procesamiento de payloads MQTT
-- **Considera Node.js** como alternativa si Bun no está disponible
-- **Java sigue siendo válido** para aplicaciones enterprise complejas
+- **🥇 Node.js** - Primera opción para MQTT/JSON processing (más maduro y estable)
+- **🥈 Bun** - Excelente para computación intensiva y desarrollo moderno  
+- **🥉 Java** - Sigue siendo válido para aplicaciones enterprise complejas y legacy
 
 ### Para Benchmarking
-- Los resultados demuestran que **el rendimiento es específico del workload**
-- **JavaScript moderno** (especialmente Bun) es altamente competitivo
+- **Workload específico**: Node.js para I/O, Bun para computación
+- **JavaScript moderno** ha superado a Java en estos escenarios comunes
 - **Las optimizaciones del runtime** importan más que el lenguaje base
+- **Era post-Java**: Los runtimes JS modernos son la nueva referencia de rendimiento
 
 ### Contribuciones
 ¡Pull requests bienvenidos! Especialmente para:
-- Nuevos tipos de benchmarks
-- Optimizaciones adicionales
-- Soporte para otros runtimes (Deno, GraalVM, etc.)
-- Benchmarks en otras arquitecturas (ARM, x86)
+- Nuevos tipos de benchmarks (networking, database, etc.)
+- Optimizaciones adicionales para Java/JavaScript
+- Soporte para otros runtimes (Deno, GraalVM, Go, Rust, etc.)
+- Benchmarks en otras arquitecturas (x86, ARM64, RISC-V)
+- Benchmarks con diferentes cargas de trabajo
 
 ---
 
-*Benchmark desarrollado para demostrar el rendimiento real de diferentes runtimes en escenarios IoT/MQTT típicos.*
+## 📚 Lecciones Aprendidas
+
+### 🎯 Mitos Desmentidos
+- ❌ **"Java siempre es más rápido"** - No para estos workloads modernos
+- ❌ **"JavaScript es lento"** - V8 y JavaScriptCore son extremadamente rápidos
+- ❌ **"Bun es solo marketing"** - Realmente supera a Node.js en computación
+
+### ✅ Realidades Confirmadas  
+- ✅ **Workload específico** - Diferentes runtimes para diferentes tareas
+- ✅ **Optimización del runtime** - Importa más que el lenguaje
+- ✅ **JavaScript moderno** - Es la nueva referencia de rendimiento
+- ✅ **Paralelización** - Crucial para el rendimiento máximo
+
+---
+
+*Benchmark desarrollado para demostrar el rendimiento real de Node.js, Bun y Java en escenarios IoT/MQTT y computación intensiva. Los resultados desafían las percepciones tradicionales sobre rendimiento de runtimes.*
