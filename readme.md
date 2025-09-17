@@ -104,19 +104,19 @@ java -Xms2g -Xmx2g -XX:+UseG1GC \
 
 | Lenguaje | Workers | Tiempo (ms) | RPS | Checksum |
 |----------|---------|-------------|-----|----------|
-| **Node.js** | 1 | 683.2 | 1,463,624 | 676,288,223 |
-| **Node.js** | 8 | 323.1 | 3,095,209 | 2,394,959,648 |
-| **Java** | 8 | 628.0 | 1,592,465 | 3,087,759,238,117 |
+| **Bun** | 1 | 713.6 | 1,401,299 | 2,729,861,900 |
+| **Bun** | 8 | 386.3 | 2,588,703 | 2,636,246,112 |
+| **Java** | 8 | 532.3 | 1,878,500 | 384,618,191,160 |
 
 ### Análisis de Resultados
 
-1. **Node.js con 8 workers** es el más rápido con **3.09M RPS**
-2. **Java con 8 workers** alcanza **1.59M RPS**
-3. **Node.js single-thread** logra **1.46M RPS**
+1. **Bun con 8 workers** es el más rápido con **2.59M RPS**
+2. **Java con 8 workers** alcanza **1.88M RPS**
+3. **Bun single-thread** logra **1.40M RPS**
 
 **Conclusiones:**
-- Node.js con worker threads supera significativamente a Java en este escenario
-- El paralelismo en Node.js (8 workers) duplica el rendimiento vs single-thread
+- Bun con worker threads supera a Java en este escenario por **37%**
+- El paralelismo en Bun (8 workers) mejora **84%** sobre single-thread
 - Java muestra un rendimiento competitivo pero inferior en este benchmark específico
 - Los checksums difieren debido a diferencias en la implementación del hash entre lenguajes
 
