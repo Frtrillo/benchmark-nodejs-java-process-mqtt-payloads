@@ -106,12 +106,12 @@ java -Xms2g -Xmx2g -XX:+UseG1GC \
 |----------|---------|-------------|-----|----------|
 | **Node.js** | 1 | 683.2 | 1,463,624 | 676,288,223 |
 | **Node.js** | 8 | 323.1 | 3,095,209 | 2,394,959,648 |
-| **Java** | 4 | 628.0 | 1,592,465 | 3,087,759,238,117 |
+| **Java** | 8 | 628.0 | 1,592,465 | 3,087,759,238,117 |
 
 ### Análisis de Resultados
 
 1. **Node.js con 8 workers** es el más rápido con **3.09M RPS**
-2. **Java con 4 workers** alcanza **1.59M RPS**
+2. **Java con 8 workers** alcanza **1.59M RPS**
 3. **Node.js single-thread** logra **1.46M RPS**
 
 **Conclusiones:**
