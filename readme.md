@@ -126,9 +126,9 @@ java -Xms4g -Xmx4g -XX:+UseG1GC \
 
 ### Configuración del Sistema
 - **CPU**: MacBook Air M1 (8 GB RAM)
-- **OS**: macOS 14.6.0
-- **Java**: OpenJDK 17+ con G1GC
-- **Runtimes JavaScript**: Bun v1.2.22 (JavaScriptCore) + Node.js (V8)
+- **OS**: macOS 14.6.0 (darwin 24.6.0)
+- **Java**: OpenJDK 24.0.2 Temurin con G1GC
+- **Runtimes JavaScript**: Bun (JavaScriptCore) + Node.js (V8)
 
 ---
 
@@ -138,25 +138,25 @@ java -Xms4g -Xmx4g -XX:+UseG1GC \
 
 | Lenguaje | Workers | Tiempo (ms) | RPS | Mejora vs Java |
 |----------|---------|-------------|-----|----------------|
-| **Bun** | 1 | 692.6 | **1,443,819** | **+52%** |
-| **Bun** | 8 | 209.5 | **4,773,226** | **+103%** 🏆 |
-| **Node.js** | 1 | 1041.0 | **960,637** | - |
-| **Node.js** | 8 | 306.9 | **3,257,972** | **+39%** |
-| **Java** | 8 | 425.5 | **2,350,428** | - |
+| **Bun** | 1 | 702.9 | **1,422,727** | **+58%** |
+| **Bun** | 8 | 247.3 | **4,043,054** | **+79%** 🏆 |
+| **Node.js** | 1 | 1027.9 | **972,835** | - |
+| **Node.js** | 8 | 321.1 | **3,114,314** | **+38%** |
+| **Java** | 8 | 442.4 | **2,260,536** | - |
 
 ### 📈 Gráfico de Rendimiento - MQTT Processing
 
 ```mermaid
 graph LR
     subgraph "MQTT Payload Processing (RPS)"
-        A[Bun Single<br/>1,443,819 RPS] 
-        B[Bun Multi 8x<br/>4,773,226 RPS]
-        C[Node.js Single<br/>960,637 RPS]
-        D[Node.js Multi 8x<br/>3,257,972 RPS]
-        E[Java 8 Workers<br/>2,350,428 RPS]
+        A[Bun Single<br/>1,422,727 RPS] 
+        B[Bun Multi 8x<br/>4,043,054 RPS]
+        C[Node.js Single<br/>972,835 RPS]
+        D[Node.js Multi 8x<br/>3,114,314 RPS]
+        E[Java 8 Workers<br/>2,260,536 RPS]
     end
     
-    B --> |Winner +103%| E
+    B --> |Winner +79%| E
     
     style B fill:#4CAF50,stroke:#2E7D32,color:#fff
     style D fill:#8BC34A,stroke:#689F38,color:#fff
@@ -172,7 +172,7 @@ xychart-beta
     title "MQTT Processing Performance (RPS)"
     x-axis ["Bun 1x", "Bun 8x", "Node 1x", "Node 8x", "Java 8x"]
     y-axis "Requests per Second" 0 --> 5000000
-    bar [1443819, 4773226, 960637, 3257972, 2350428]
+    bar [1422727, 4043054, 972835, 3114314, 2260536]
 ```
 
 ---
@@ -183,11 +183,11 @@ xychart-beta
 
 | Lenguaje | Workers | Tiempo (ms) | Ops/Sec | Mejora vs Java |
 |----------|---------|-------------|---------|----------------|
-| **Bun** | 1 | 758.2 | **132** | - |
-| **Bun** | 8 | 168.0 | **571** | **+110%** 🏆 |
-| **Node.js** | 1 | 1114.3 | **90** | - |
-| **Node.js** | 8 | 279.1 | **344** | **+27%** |
-| **Java** | 8 | 1847.4 | **271** | - |
+| **Bun** | 1 | 761.1 | **131** | - |
+| **Bun** | 8 | 167.9 | **572** | **+103%** 🏆 |
+| **Node.js** | 1 | 1161.3 | **86** | - |
+| **Node.js** | 8 | 276.6 | **347** | **+23%** |
+| **Java** | 8 | 1777.5 | **281** | - |
 
 *Configuración: 500 sensores × 100,000 iteraciones = 50M operaciones*
 
@@ -196,14 +196,14 @@ xychart-beta
 ```mermaid
 graph LR
     subgraph "Algorithmic Computation (Ops/Sec)"
-        A[Bun Single<br/>132 Ops/Sec] 
-        B[Bun Multi 8x<br/>571 Ops/Sec]
-        C[Node.js Single<br/>90 Ops/Sec]
-        D[Node.js Multi 8x<br/>344 Ops/Sec]
-        E[Java 8 Workers<br/>271 Ops/Sec]
+        A[Bun Single<br/>131 Ops/Sec] 
+        B[Bun Multi 8x<br/>572 Ops/Sec]
+        C[Node.js Single<br/>86 Ops/Sec]
+        D[Node.js Multi 8x<br/>347 Ops/Sec]
+        E[Java 8 Workers<br/>281 Ops/Sec]
     end
     
-    B --> |Winner +110%| E
+    B --> |Winner +103%| E
     
     style B fill:#4CAF50,stroke:#2E7D32,color:#fff
     style D fill:#8BC34A,stroke:#689F38,color:#fff
@@ -219,7 +219,7 @@ xychart-beta
     title "Algorithmic Performance (Operations/Sec)"
     x-axis ["Bun 1x", "Bun 8x", "Node 1x", "Node 8x", "Java 8x"]
     y-axis "Operations per Second" 0 --> 600
-    bar [132, 571, 90, 344, 271]
+    bar [131, 572, 86, 347, 281]
 ```
 
 ---
@@ -237,29 +237,29 @@ pie title "Performance Winners by Benchmark"
 
 | Benchmark | Ganador | Ventaja | Razón Principal |
 |-----------|---------|---------|-----------------|
-| 📨 **MQTT Processing** | **Bun** | **+103%** | JavaScriptCore v1.2.22 + optimizaciones mejoradas |
-| 🧮 **Algorithmic** | **Bun** | **+110%** | JavaScriptCore + JIT agresivo optimizado |
+| 📨 **MQTT Processing** | **Bun** | **+79%** | JavaScriptCore + optimizaciones mejoradas |
+| 🧮 **Algorithmic** | **Bun** | **+103%** | JavaScriptCore + JIT agresivo optimizado |
 
 ### 🥇 Ranking General por Runtime
 
 | Posición | Runtime | MQTT RPS | Algo Ops/Sec | Fortalezas |
 |----------|---------|----------|---------------|------------|
-| 🥇 **1st** | **Bun** | 4,773,226 | 571 | Dominio absoluto, JavaScriptCore v1.2.22 optimizado |
-| 🥈 **2nd** | **Node.js** | 3,257,972 | 344 | V8 sólido, segunda opción confiable |
-| 🥉 **3rd** | **Java** | 2,350,428 | 271 | Estable pero superado por runtimes JS modernos |
+| 🥇 **1st** | **Bun** | 4,043,054 | 572 | Dominio absoluto, JavaScriptCore optimizado |
+| 🥈 **2nd** | **Node.js** | 3,114,314 | 347 | V8 sólido, segunda opción confiable |
+| 🥉 **3rd** | **Java** | 2,260,536 | 281 | Estable pero superado por runtimes JS modernos |
 
 ### 🔍 Conclusiones Clave
 
-1. **🥇 Bun domina ambos benchmarks** - JavaScriptCore v1.2.22 líder absoluto
-2. **🚀 Mejoras significativas tras actualización** - Bun v1.2.22 vs v1.2.14: +156% en MQTT, +10% en algoritmos
+1. **🥇 Bun domina ambos benchmarks** - JavaScriptCore líder absoluto
+2. **🚀 Rendimiento consistente** - Bun mantiene ventaja significativa en ambos workloads
 3. **📊 JavaScript supera a Java** - Ambos runtimes JS superan a Java consistentemente  
 4. **⚡ Bun como nueva referencia** - El runtime más rápido para estos workloads modernos
 5. **🎯 Runtimes JS modernos** - Definitivamente han superado a Java en rendimiento
 
 ### 💡 ¿Por qué JavaScript gana?
 
-**Bun (JavaScriptCore v1.2.22) - Campeón Absoluto:**
-- **Optimizaciones v1.2.22**: Mejoras significativas en JIT y manejo de memoria
+**Bun (JavaScriptCore) - Campeón Absoluto:**
+- **Optimizaciones modernas**: Mejoras continuas en JIT y manejo de memoria
 - **JIT superior**: JavaScriptCore supera a V8 y Java en estos workloads
 - **Menor overhead**: Menos abstracción, más rendimiento directo
 - **Startup instantáneo**: Sin warmup, optimización inmediata
@@ -333,7 +333,7 @@ pie title "Performance Winners by Benchmark"
 
 ### Para Benchmarking
 - **Bun lidera todo**: Mejor opción para ambos tipos de workload
-- **Actualizaciones importan**: Bun v1.2.22 mostró mejoras dramáticas vs v1.2.14
+- **Rendimiento consistente**: Bun mantiene su liderazgo en múltiples workloads
 - **JavaScript moderno** ha superado definitivamente a Java en estos escenarios
 - **Era Bun**: JavaScriptCore se posiciona como la nueva referencia de rendimiento
 
@@ -352,14 +352,14 @@ pie title "Performance Winners by Benchmark"
 ### 🎯 Mitos Desmentidos
 - ❌ **"Java siempre es más rápido"** - Bun y Node.js lo superan consistentemente
 - ❌ **"JavaScript es lento"** - JavaScriptCore y V8 son los runtimes más rápidos
-- ❌ **"Bun es solo marketing"** - Domina ambos benchmarks con mejoras constantes
+- ❌ **"Bun es solo marketing"** - Domina ambos benchmarks de forma consistente
 
 ### ✅ Realidades Confirmadas  
 - ✅ **Bun domina todo** - Un solo runtime para múltiples workloads
-- ✅ **Actualizaciones críticas** - Cada versión puede traer mejoras dramáticas
+- ✅ **Rendimiento estable** - Bun mantiene su liderazgo de forma consistente
 - ✅ **JavaScript moderno** - Definitivamente la nueva referencia de rendimiento
 - ✅ **Paralelización** - Crucial para el rendimiento máximo
 
 ---
 
-*Benchmark desarrollado para demostrar el rendimiento real de Node.js, Bun y Java en escenarios IoT/MQTT y computación intensiva. Los resultados muestran el dominio absoluto de Bun v1.2.22, estableciendo un nuevo estándar de rendimiento para runtimes modernos.*
+*Benchmark desarrollado para demostrar el rendimiento real de Node.js, Bun y Java en escenarios IoT/MQTT y computación intensiva. Los resultados muestran el dominio consistente de Bun, estableciendo un nuevo estándar de rendimiento para runtimes modernos.*
