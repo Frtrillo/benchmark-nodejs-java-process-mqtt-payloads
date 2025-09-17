@@ -13,7 +13,7 @@ Para cada registro se ejecutan las siguientes operaciones:
 
 ## Requisitos
 
-- **Node.js**: 18+ (para worker threads)
+- **Node.js**: 18+ (para worker threads) **o Bun** (runtime alternativo)
 - **Java**: 17+ 
 - **Maven**: Para compilar el proyecto Java
 
@@ -27,8 +27,8 @@ mvn -DskipTests package
 
 Esto genera el JAR ejecutable en `target/bench-java-1.0.0.jar`.
 
-### Node.js
-No requiere compilación, solo ejecución directa.
+### Node.js/Bun
+No requiere compilación, solo ejecución directa. El script detecta automáticamente si tienes Node.js o Bun instalado.
 
 ## Ejecución
 
@@ -40,7 +40,8 @@ No requiere compilación, solo ejecución directa.
 ```
 
 Este script:
-- ✅ Verifica dependencias automáticamente
+- ✅ Verifica dependencias automáticamente (Node.js/Bun, Java, Maven)
+- 🔍 Detecta automáticamente si usar Node.js o Bun
 - 🔨 Compila Java si es necesario
 - 🏃 Ejecuta todos los benchmarks
 - 📊 Muestra resultados comparativos
@@ -48,16 +49,20 @@ Este script:
 
 ### Ejecución Manual
 
-#### Node.js
+#### Node.js/Bun
 
 **Hilo único:**
 ```bash
 node bench_node.js
+# o con Bun:
+bun bench_node.js
 ```
 
 **Multi-threading (recomendado):**
 ```bash
 WORKERS=8 node bench_node.js
+# o con Bun:
+WORKERS=8 bun bench_node.js
 ```
 
 #### Java
@@ -77,7 +82,7 @@ java -Xms2g -Xmx2g -XX:+UseG1GC \
 
 ### Parámetros
 
-**Node.js:**
+**Node.js/Bun:**
 - `WORKERS`: Número de worker threads (variable de entorno)
 
 **Java:**

@@ -50,8 +50,16 @@ echo ""
 # Verificar dependencias
 echo -e "${YELLOW}🔍 Verificando dependencias...${NC}"
 
-if ! command -v node &> /dev/null; then
-    echo -e "${RED}❌ Node.js no está instalado${NC}"
+# Detectar runtime de Node.js
+NODE_RUNTIME=""
+if command -v bun &> /dev/null; then
+    NODE_RUNTIME="bun"
+    echo -e "${GREEN}✅ Bun detectado${NC}"
+elif command -v node &> /dev/null; then
+    NODE_RUNTIME="node"
+    echo -e "${GREEN}✅ Node.js detectado${NC}"
+else
+    echo -e "${RED}❌ Ni Node.js ni Bun están instalados${NC}"
     exit 1
 fi
 
@@ -66,6 +74,7 @@ if ! command -v mvn &> /dev/null; then
 fi
 
 echo -e "${GREEN}✅ Todas las dependencias están disponibles${NC}"
+echo -e "${BLUE}📋 Runtime de Node.js: $NODE_RUNTIME${NC}"
 echo ""
 
 # Compilar Java si es necesario
@@ -79,14 +88,14 @@ if [ ! -f "bench_java/target/bench-java-1.0.0.jar" ]; then
 fi
 
 # Benchmark Node.js single-thread
-echo -e "${YELLOW}🏃 Ejecutando Node.js (single-thread)...${NC}"
-NODE_SINGLE=$(node bench_node.js)
-show_result "Node.js" "1" "$NODE_SINGLE"
+echo -e "${YELLOW}🏃 Ejecutando $NODE_RUNTIME (single-thread)...${NC}"
+NODE_SINGLE=$($NODE_RUNTIME bench_node.js)
+show_result "$NODE_RUNTIME" "1" "$NODE_SINGLE"
 
 # Benchmark Node.js multi-thread
-echo -e "${YELLOW}🏃 Ejecutando Node.js (multi-thread, $NODE_WORKERS workers)...${NC}"
-NODE_MULTI=$(WORKERS=$NODE_WORKERS node bench_node.js)
-show_result "Node.js" "$NODE_WORKERS" "$NODE_MULTI"
+echo -e "${YELLOW}🏃 Ejecutando $NODE_RUNTIME (multi-thread, $NODE_WORKERS workers)...${NC}"
+NODE_MULTI=$(WORKERS=$NODE_WORKERS $NODE_RUNTIME bench_node.js)
+show_result "$NODE_RUNTIME" "$NODE_WORKERS" "$NODE_MULTI"
 
 # Benchmark Java
 echo -e "${YELLOW}🏃 Ejecutando Java ($JAVA_WORKERS workers)...${NC}"
@@ -104,31 +113,31 @@ echo -e "${GREEN}📈 RESUMEN COMPARATIVO${NC}"
 echo "================================="
 printf "%-20s %-10s %-15s\n" "Lenguaje" "Workers" "RPS"
 echo "---------------------------------"
-printf "%-20s %-10s %-15s\n" "Node.js" "1" "$NODE_SINGLE_RPS"
-printf "%-20s %-10s %-15s\n" "Node.js" "$NODE_WORKERS" "$NODE_MULTI_RPS"
+printf "%-20s %-10s %-15s\n" "$NODE_RUNTIME" "1" "$NODE_SINGLE_RPS"
+printf "%-20s %-10s %-15s\n" "$NODE_RUNTIME" "$NODE_WORKERS" "$NODE_MULTI_RPS"
 printf "%-20s %-10s %-15s\n" "Java" "$JAVA_WORKERS" "$JAVA_RPS"
 echo "---------------------------------"
 
 # Determinar el ganador
 if [ "$NODE_MULTI_RPS" -gt "$JAVA_RPS" ] && [ "$NODE_MULTI_RPS" -gt "$NODE_SINGLE_RPS" ]; then
-    echo -e "${GREEN}🏆 Ganador: Node.js con $NODE_WORKERS workers ($NODE_MULTI_RPS RPS)${NC}"
+    echo -e "${GREEN}🏆 Ganador: $NODE_RUNTIME con $NODE_WORKERS workers ($NODE_MULTI_RPS RPS)${NC}"
 elif [ "$JAVA_RPS" -gt "$NODE_SINGLE_RPS" ]; then
     echo -e "${BLUE}🏆 Ganador: Java con $JAVA_WORKERS workers ($JAVA_RPS RPS)${NC}"
 else
-    echo -e "${YELLOW}🏆 Ganador: Node.js single-thread ($NODE_SINGLE_RPS RPS)${NC}"
+    echo -e "${YELLOW}🏆 Ganador: $NODE_RUNTIME single-thread ($NODE_SINGLE_RPS RPS)${NC}"
 fi
 
 # Calcular mejoras
 NODE_IMPROVEMENT=$(( (NODE_MULTI_RPS * 100) / NODE_SINGLE_RPS - 100 ))
 if [ "$NODE_MULTI_RPS" -gt "$JAVA_RPS" ]; then
     JAVA_VS_NODE=$(( (NODE_MULTI_RPS * 100) / JAVA_RPS - 100 ))
-    echo -e "${GREEN}📊 Node.js multi-thread es $JAVA_VS_NODE% más rápido que Java${NC}"
+    echo -e "${GREEN}📊 $NODE_RUNTIME multi-thread es $JAVA_VS_NODE% más rápido que Java${NC}"
 else
     NODE_VS_JAVA=$(( (JAVA_RPS * 100) / NODE_MULTI_RPS - 100 ))
-    echo -e "${BLUE}📊 Java es $NODE_VS_JAVA% más rápido que Node.js multi-thread${NC}"
+    echo -e "${BLUE}📊 Java es $NODE_VS_JAVA% más rápido que $NODE_RUNTIME multi-thread${NC}"
 fi
 
-echo -e "${GREEN}📊 Node.js multi-thread mejora $NODE_IMPROVEMENT% sobre single-thread${NC}"
+echo -e "${GREEN}📊 $NODE_RUNTIME multi-thread mejora $NODE_IMPROVEMENT% sobre single-thread${NC}"
 
 echo ""
 echo -e "${GREEN}✅ Benchmark completado exitosamente${NC}"
