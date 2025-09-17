@@ -1,3 +1,8 @@
-bench/Bench.class
 bench/Bench$Result.class
+bench/AlgoBench.class
 bench/Bench$Agg.class
+bench/AlgoBench$RiskResult.class
+bench/AlgoBench$BatchResult.class
+bench/Bench.class
+bench/AlgoBench$SensorData.class
+bench/AlgoBench$PRNG.class
