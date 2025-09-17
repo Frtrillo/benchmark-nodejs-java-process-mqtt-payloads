@@ -76,8 +76,8 @@ java -jar target/bench-java-1.0.0.jar
 **Ejecución optimizada (recomendado):**
 ```bash
 java -Xms2g -Xmx2g -XX:+UseG1GC \
-  -jar target/bench-java-1.0.0.jar \
-  -Dtotal=1000000 -Dworkers=4 -Dbatch=10000 -Ddevices=1000
+  -Dtotal=1000000 -Dworkers=4 -Dbatch=10000 -Ddevices=1000 \
+  -jar target/bench-java-1.0.0.jar
 ```
 
 ### Parámetros
@@ -91,10 +91,12 @@ java -Xms2g -Xmx2g -XX:+UseG1GC \
 - `-Dbatch`: Tamaño de lote por thread (default: 10,000)
 - `-Ddevices`: Número de dispositivos únicos (default: 1,000)
 
+> **Nota**: Los parámetros `-D` deben ir **antes** del `-jar` en Java, no después.
+
 ## Resultados
 
 ### Configuración del Sistema
-- **CPU**: MacBook Air M1/M2
+- **CPU**: MacBook Air M1 (8 gb)
 - **Registros procesados**: 1,000,000
 - **Dispositivos únicos**: 1,000
 

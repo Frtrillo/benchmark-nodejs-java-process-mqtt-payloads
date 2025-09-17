@@ -100,8 +100,8 @@ show_result "$NODE_RUNTIME" "$NODE_WORKERS" "$NODE_MULTI"
 # Benchmark Java
 echo -e "${YELLOW}🏃 Ejecutando Java ($JAVA_WORKERS workers)...${NC}"
 JAVA_RESULT=$(cd bench_java && java -Xms2g -Xmx2g -XX:+UseG1GC \
-    -jar target/bench-java-1.0.0.jar \
-    -Dtotal=$TOTAL_RECORDS -Dworkers=$JAVA_WORKERS -Dbatch=$JAVA_BATCH -Ddevices=$JAVA_DEVICES)
+    -Dtotal=$TOTAL_RECORDS -Dworkers=$JAVA_WORKERS -Dbatch=$JAVA_BATCH -Ddevices=$JAVA_DEVICES \
+    -jar target/bench-java-1.0.0.jar)
 show_result "Java" "$JAVA_WORKERS" "$JAVA_RESULT"
 
 # Extraer RPS para comparación
