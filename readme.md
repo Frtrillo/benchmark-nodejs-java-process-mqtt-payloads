@@ -32,7 +32,23 @@ No requiere compilación, solo ejecución directa.
 
 ## Ejecución
 
-### Node.js
+### 🚀 Ejecución Automática (Recomendado)
+
+**Script automatizado que ejecuta todos los benchmarks:**
+```bash
+./run_benchmark.sh
+```
+
+Este script:
+- ✅ Verifica dependencias automáticamente
+- 🔨 Compila Java si es necesario
+- 🏃 Ejecuta todos los benchmarks
+- 📊 Muestra resultados comparativos
+- 🏆 Determina el ganador automáticamente
+
+### Ejecución Manual
+
+#### Node.js
 
 **Hilo único:**
 ```bash
@@ -44,7 +60,7 @@ node bench_node.js
 WORKERS=8 node bench_node.js
 ```
 
-### Java
+#### Java
 
 **Ejecución básica:**
 ```bash
