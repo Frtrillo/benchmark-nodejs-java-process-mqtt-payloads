@@ -25,7 +25,7 @@ Simulación Monte Carlo intensiva en CPU:
 ## Requisitos
 
 - **Node.js**: 18+ (para worker threads) **o Bun** (runtime alternativo)
-- **Java**: 17+ 
+- **Java**: 24+ 
 - **Maven**: Para compilar el proyecto Java
 
 ## Compilación
